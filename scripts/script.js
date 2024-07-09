@@ -24,26 +24,59 @@ function resetGridColors(grid, color) {
     let gridContainerChildren = grid.children;
     for (let i = 0; i < gridContainerChildren.length; i++) {
         gridContainerChildren[i].style.backgroundColor = color;
+        gridContainerChildren[i].style.opacity = 1;
     }
 }
 
+function chooseRandomColorRGB() {
+    let red = Math.floor(Math.random() * 256);
+    let green = Math.floor(Math.random() * 256);
+    let blue = Math.floor(Math.random() * 256);
+    let rgbValue = `rgb(${red},${green},${blue})`;
+    return rgbValue;
+}
 
-function changeColorOnHover(element, brushColor, startColor) {
+function reduceElementOpacity(element) {
+    let elementOpacity = element.style.opacity;
 
-    element.addEventListener("mousemove", (e) => {
+    if (elementOpacity <= 0) {
+        elementOpacity = 1;
+    } else {
+        elementOpacity -= 0.1;
+    }
+
+    element.style.opacity = elementOpacity;
+}
+
+function resetElementOpacity(element) {
+    element.style.opacity = 1;
+}
+
+function changeColorOnHover(element, startColor) {
+    element.addEventListener("mouseenter", (e) => {
         if (isMouseDown && !isEraseActive) {
-            element.style.backgroundColor = brushColor;
+
+            element.style.backgroundColor = chooseRandomColorRGB();
+            reduceElementOpacity(element);
+
         } else if (isMouseDown && isEraseActive) {
 
             element.style.backgroundColor = startColor;
+            resetElementOpacity(element);
         }
     });
 
     element.addEventListener("mousedown", (e) => {
         if (!isEraseActive) {
-            element.style.backgroundColor = brushColor;
+
+            element.style.backgroundColor = chooseRandomColorRGB();
+            reduceElementOpacity(element);
+
         } else {
+
             element.style.backgroundColor = startColor;
+            resetElementOpacity(element);
+
         }
     });
 }
@@ -58,12 +91,12 @@ function makeGrid() {
         gridCell.style.backgroundColor = `${startColor}`;
         gridCell.style.width = `${gridCellSizePercent}%`;
         gridCell.style.height = `${gridCellSizePercent}%`;
-        changeColorOnHover(gridCell, brushColor, startColor);
+        gridCell.style.opacity = 1;
+        changeColorOnHover(gridCell, startColor);
         gridContainer.appendChild(gridCell);
     }
 
 }
-
 
 
 document.addEventListener("mousedown", () => {
@@ -78,7 +111,9 @@ sizeBtn.addEventListener("click", () => {
     let userInputGridSize = 0;
     do {
         userInputGridSize = prompt("Enter the grid size(up to 100)", gridAxisLength);
-    } while (!userInputGridSize || isNaN(userInputGridSize));
+    } while ((!userInputGridSize || isNaN(userInputGridSize)) ||
+        (userInputGridSize < 1 || userInputGridSize > 100));
+
     gridAxisLength = userInputGridSize;
     makeGrid();
 });
